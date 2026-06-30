@@ -1,7 +1,7 @@
 # CLAUDE.md — conventions for this repo
 
 API test automation: **Java 11 + REST Assured + JUnit 5 + Maven**, Jira/Xray
-traceability, Allure reporting. Opens as an Eclipse project.
+traceability, Allure reporting. 
 
 ## Commands
 - `mvn test` — run all tests (uses `config/env.properties` defaults).
@@ -34,3 +34,31 @@ traceability, Allure reporting. Opens as an Eclipse project.
 - Cover happy-path, negative/error cases, auth, and a response-time guard.
 - Prefer Hamcrest matchers in `.body(...)`; validate JSON schema where useful via
   `json-schema-validator`.
+
+## Jira-Driven QA Automation (startup workflow)
+
+On VS Code folder open, `scripts/startup-sync-check.ps1` reminds you to run the
+sync once per calendar day. Run the workflow via the registered skill:
+
+```
+/ready-for-testing
+```
+
+**What it does:**
+1. Fetches all LBVOICESER stories in "Ready for QA" status via Atlassian MCP.
+2. Evaluates each ticket for test-readiness using `.claude/prompts/context-check.md`.
+   - **SUFFICIENT** (has ≥1 AC + endpoint + method + required examples) → generates a test class.
+   - **INSUFFICIENT** → posts a Jira comment to the assignee listing exactly what's missing.
+3. Generated test classes are written to `src/test/java/com/laerdal/api/tests/` and
+   presented for human review. Type `approve` to run `mvn test` + Allure report,
+   or `reject` to discard.
+
+**Prompt library** (`.claude/prompts/`):
+
+| File | Purpose |
+|---|---|
+| `context-check.md` | Evaluates ticket test-readiness; returns SUFFICIENT / INSUFFICIENT |
+| `test-generation.md` | Generates Java test class following project conventions |
+| `story-update.md` | Posts a structured Jira comment requesting missing AC / examples |
+
+Each prompt defines: role, persona, instructions, rules, example, and fallback action.

@@ -13,7 +13,7 @@
     <description>REST Assured + JUnit 5 API tests with Jira/Xray traceability and Allure reporting</description>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>11</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
@@ -28,6 +28,8 @@
         <surefire.version>3.2.5</surefire.version>
         <allure-maven.version>2.12.0</allure-maven.version>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
+        <exec-maven.version>3.1.0</exec-maven.version>
+        <clean-plugin.version>3.2.0</clean-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -59,12 +61,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- REST Assured -->
+        <!-- REST Assured — compile scope so src/main clients can use it -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${rest-assured.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
@@ -79,10 +80,10 @@
             <artifactId>allure-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- compile scope so src/main clients/utils can attach Allure steps -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-rest-assured</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <!-- Xray test-management annotations + enhanced JUnit XML report -->
@@ -93,12 +94,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JSON (de)serialization for REST Assured POJO request/response bodies -->
+        <!-- JSON (de)serialization — compile scope so src/main utils/data can use it -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -123,6 +123,8 @@
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
+                    <!-- Continue to report generation even when tests fail -->
+                    <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -140,6 +142,47 @@
                 <configuration>
                     <reportVersion>${allure.version}</reportVersion>
                 </configuration>
+                <executions>
+                    <!-- Auto-generate report immediately after surefire finishes -->
+                    <execution>
+                        <id>allure-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven.version}</version>
+                <executions>
+                    <!-- Open the report in the default browser right after it is built -->
+                    <execution>
+                        <id>open-allure-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Launch allure:serve in a new window so Maven does not block.
+                                 allure:serve starts an HTTP server (avoids file:// CORS issue)
+                                 and opens the browser automatically. -->
+                            <executable>cmd</executable>
+                            <arguments>
+                                <argument>/c</argument>
+                                <argument>start</argument>
+                                <argument>Allure Report</argument>
+                                <argument>cmd</argument>
+                                <argument>/c</argument>
+                                <argument>mvn allure:serve</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

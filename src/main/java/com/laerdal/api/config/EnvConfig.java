@@ -66,6 +66,16 @@ public final class EnvConfig {
         return get("tts.path", "/tts/v1/tts");
     }
 
+    /** Path of the TTS stream endpoint, relative to {@link #baseUri()}. */
+    public static String ttsStreamPath() {
+        return get("tts.stream.path", "/tts/v1/tts-stream");
+    }
+
+    /** Path of the voice-configurations endpoint, relative to {@link #baseUri()}. */
+    public static String voiceConfigPath() {
+        return get("voice.config.path", "/tts/v1/voice-configurations");
+    }
+
     /**
      * Resolve a single key by logical (dot.case) name.
      * The OS env var form is the UPPER_SNAKE_CASE of the same name.

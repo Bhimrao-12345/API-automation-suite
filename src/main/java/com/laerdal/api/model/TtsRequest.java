@@ -1,5 +1,7 @@
 package com.laerdal.api.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Body for {@code POST /tts/v1/tts}.
  *
@@ -7,6 +9,7 @@ package com.laerdal.api.model;
  * { "voice": "Female_Aria_Hopeful_LowPitch", "speechText": "..." }
  * }</pre>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TtsRequest {
 
     public String voice;
