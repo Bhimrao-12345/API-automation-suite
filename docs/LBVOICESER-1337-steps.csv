@@ -1,0 +1,6 @@
+Action,Data,Expected Result
+"POST /tts/v1/tts-stream with valid Bearer token, voice, and speechText","Authorization: Bearer <valid_token> | body: {""voice"":""en-US-JennyNeural"",""speechText"":""Hello World""}","HTTP 200, non-empty audio response body"
+"POST /tts/v1/tts-stream with no Authorization header","No Authorization header | body: {""voice"":""en-US-JennyNeural"",""speechText"":""Hello World""}","HTTP 400"
+"POST /tts/v1/tts-stream with valid Bearer token and empty JSON body {}","Authorization: Bearer <valid_token> | body: {}","HTTP 400"
+"POST /tts/v1/tts-stream with valid Bearer token, only speechText provided (voice omitted)","Authorization: Bearer <valid_token> | body: {""speechText"":""Hello World""}","HTTP 200"
+"POST /tts/v1/tts-stream with valid Bearer token, only voice provided (speechText omitted)","Authorization: Bearer <valid_token> | body: {""voice"":""en-US-JennyNeural""}","HTTP 200"
